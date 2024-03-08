@@ -31,6 +31,11 @@ interface Issue {
   status: string;
 }
 
+interface IssueStatusHistory {
+  created: string;
+  status: string;
+}
+
 export default class JiraClient {
   private readonly authToken: string;
   constructor(
@@ -95,5 +100,49 @@ export default class JiraClient {
           emailAddress: user.emailAddress,
         };
       });
+  }
+
+  // public async function issueStatusHistory(issueId: string): Promise<IssueStatusHistory[]>{
+  //   return axios.get(`${this.config.jiraApiUrl}/issue/${issueId}/changelog`, {
+  //     headers: {
+  //       Authorization: `Basic ${this.authToken}`,
+  //     },
+  //   });
+
+  // }
+
+  /**
+   * Retrieves the issue status history.
+   *
+   * @param issueId
+   * @returns {Promise<IssueStatusHistory[]>} List of issue status history.
+   */
+  public async getIssueStatusHistory(
+    issueId: string
+  ): Promise<IssueStatusHistory[]> {
+    const response = await axios.get(
+      `${this.config.jiraApiUrl}/issue/${issueId}/changelog`,
+      {
+        headers: {
+          Authorization: `Basic ${this.authToken}`,
+        },
+      }
+    );
+
+    const status: IssueStatusHistory[] = [];
+
+    response.data.values.forEach((log: any) => {
+      const items = log.items;
+      items.forEach((item: any) => {
+        if (item.fieldId === 'status') {
+          status.push({
+            created: log.created,
+            status: item.toString,
+          });
+        }
+      });
+    });
+
+    return status;
   }
 }

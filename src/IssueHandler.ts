@@ -45,11 +45,8 @@ export default class IssueHandler {
 
         if (response.issues.length === 0) break;
 
-        response.issues.forEach((issue: any) => {
-          const timeSpent = this.getTimeSpent(
-            issue.fields.created,
-            issue.fields.resolutiondate
-          );
+        for (const issue of response.issues) {
+          const timeSpent = await this.getTimeSpent(issue.id);
 
           issues.push({
             id: issue.id,
@@ -58,10 +55,10 @@ export default class IssueHandler {
             isResolved: issue.fields.resolution !== null,
             createdDate: issue.fields.created,
             resolutionDate: issue.fields.resolutiondate,
-            timeSpent: timeSpent,
+            timeSpent: issue.createdDate ? timeSpent : null,
             status: issue.fields.status.name,
           });
-        });
+        }
 
         startAt += maxResults;
       } catch (error) {
@@ -94,15 +91,26 @@ export default class IssueHandler {
    * @returns {number|null} The spent time in seconds, or null
    *
    */
-  private getTimeSpent(
-    createdDate: string,
-    resolutionDate: string | null
-  ): number | null {
-    if (!resolutionDate) return null;
+  private async getTimeSpent(issueId: string): Promise<number | null> {
+    const status = await this.jiraClient.getIssueStatusHistory(issueId);
 
-    const created = new Date(createdDate);
-    const resolution = new Date(resolutionDate);
+    if (status.length === 0) return null;
+    if (!status.some((s: any) => s.status === 'In Progress')) return null;
 
-    return (resolution.getTime() - created.getTime()) / 1000;
+    let timeSpent = 0;
+
+    status.forEach((item, index) => {
+      if (item.status === 'In Progress') {
+        if (status[index + 1]) {
+          const time =
+            Number(new Date(status[index + 1].created)) -
+            Number(new Date(item.created));
+
+          timeSpent += Math.floor(time / 1000);
+        }
+      }
+    });
+
+    return timeSpent;
   }
 }
