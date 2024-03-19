@@ -14,7 +14,7 @@ Command line-based tools for tracking issue for each user in Jira
    ```
 2. Install all package and dependencies.
    ```bash
-    npm run install
+    npm install
    ```
 3. Build the project
     ```bash
@@ -36,59 +36,64 @@ Command line-based tools for tracking issue for each user in Jira
         "emailAddress": "alex.johnson@example.com",
         "issues": [
           {
-            "id": "20001",
-            "key": "PROJ-2",
-            "project": "Project Alpha",
-            "isResolved": false,
-            "createdDate": "2024-03-01T10:00:10.325+0700",
-            "resolutionDate": null,
-            "timeSpent": null,
-            "status": "In Progress"
-          },
-          {
-            "id": "20000",
+            "id": "10007",
             "key": "PROJ-1",
             "project": "Project Alpha",
-            "isResolved": false,
-            "createdDate": "2024-03-01T09:50:29.586+0700",
-            "resolutionDate": null,
-            "timeSpent": null,
-            "status": "In Progress"
-          }
-        ]
-      },
-      {
-        "displayName": "Jamie Smith",
-        "accountId": "712020:efgh5678-a307-4981-82f1-3dadcad206fc",
-        "accountType": "atlassian",
-        "active": true,
-        "issues": [
-          {
-            "id": "20002",
-            "key": "PROJ-3",
-            "project": "Project Alpha",
             "isResolved": true,
-            "createdDate": "2024-03-02T11:15:04.644+0700",
-            "resolutionDate": "2024-03-02T11:45:20.065+0700",
-            "timeSpent": 1820.421,
-            "status": "Completed"
+            "inProgressAt": null,
+            "inReviewAt": null,
+            "createdAt": "2024-03-14T09:04:24.703+0700",
+            "resolvedAt": "2024-03-14T09:48:34.739+0700",
+            "status": "Done",
+            "stage": {
+              "createToInProgress": 0,
+              "inProgressToInReview": 0,
+              "inReviewToDone": 0,
+              "createToInReview": 0,
+              "createToDone": 2650,
+              "averageDuration": 530
+            }
+          },
+          {
+            "id": "10006",
+            "key": "PROJ-2",
+            "project": "Alpha Project",
+            "isResolved": true,
+            "inProgressAt": "2024-03-07T14:53:03.158+0700",
+            "inReviewAt": "2024-03-07T15:39:58.973+0700",
+            "createdAt": "2024-03-07T14:52:40.531+0700",
+            "resolveAt": "2024-03-07T15:45:12.764+0700",
+            "status": "Done",
+            "stage": {
+              "createToInProgress": 22,
+              "inProgressToInReview": 2815,
+              "inReviewToDone": 313,
+              "createToInReview": 2838,
+              "createToDone": 3152,
+              "averageDuration": 1828
+            }
           }
         ]
       }
     ]
    ```
+
 ## Run globally
-If you wanna run this script globally, just simply run this command first in the project directory
+
+If you want to run this script globally, just simply run this command first in the project directory
+
 ```bash
 sudo npm install -g .
 ```
-Now you can run this program every where, just simply by typing this
+
+Now you can run this program everywhere, just simply by typing this
+
 ```bash
 issue-tracker --since 2023-04-04 --until 2024-03-03
 ```
 
-
 ## Help
+
 ```bash
 Usage: Jira issue tracker
 
@@ -98,9 +103,8 @@ Options:
   -h, --help           display help for command
 ```
 
-    
 ## Authors
 
-- [@andrianramadan](https://www.github.com/andrianramadan)
+- [@andrian2929](https://www.github.com/andrian2929)
 
 **Made with ❤️ by Aan**

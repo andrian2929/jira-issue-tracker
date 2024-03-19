@@ -1,4 +1,4 @@
-import axios from 'axios';
+import axios from "axios";
 
 interface JiraConfig {
   jiraApiUrl: string;
@@ -25,26 +25,36 @@ interface Issue {
   key: string;
   project: string;
   isResolved: boolean;
-  createdDate: string;
-  resolutionDate: string;
-  timeSpent: number | null;
+  inProgressAt: string | null;
+  inReviewAt: string | null;
+  createdAt: string;
+  resolvedAt: string;
   status: string;
+  stage: {
+    createToInProgress: number;
+    inProgressToInReview: number;
+    inReviewToDone: number;
+    createToInReview: number;
+    createToDone: number;
+    averageDuration: number;
+  };
 }
 
 interface IssueStatusHistory {
   created: string;
-  status: string;
+  status: "In Progress" | "In Review" | "Done" | "To Do";
 }
 
 export default class JiraClient {
   private readonly authToken: string;
+
   constructor(
     private readonly config: JiraConfig,
-    private readonly option: Option
+    private readonly option: Option,
   ) {
     this.authToken = Buffer.from(
-      `${config.jiraEmail}:${config.jiraApiToken}`
-    ).toString('base64');
+      `${config.jiraEmail}:${config.jiraApiToken}`,
+    ).toString("base64");
   }
 
   /**
@@ -58,7 +68,7 @@ export default class JiraClient {
   public async getIssues(
     assigneeAccountId: string,
     startAt: number = 0,
-    maxResults: number = 50
+    maxResults: number = 50,
   ): Promise<any> {
     try {
       const response = await axios.get(
@@ -67,7 +77,7 @@ export default class JiraClient {
           headers: {
             Authorization: `Basic ${this.authToken}`,
           },
-        }
+        },
       );
 
       return response.data;
@@ -90,7 +100,7 @@ export default class JiraClient {
     });
 
     return response.data
-      .filter((user: User) => user.accountType === 'atlassian')
+      .filter((user: User) => user.accountType === "atlassian" && user.active)
       .map((user: User) => {
         return {
           displayName: user.displayName,
@@ -102,15 +112,6 @@ export default class JiraClient {
       });
   }
 
-  // public async function issueStatusHistory(issueId: string): Promise<IssueStatusHistory[]>{
-  //   return axios.get(`${this.config.jiraApiUrl}/issue/${issueId}/changelog`, {
-  //     headers: {
-  //       Authorization: `Basic ${this.authToken}`,
-  //     },
-  //   });
-
-  // }
-
   /**
    * Retrieves the issue status history.
    *
@@ -118,7 +119,7 @@ export default class JiraClient {
    * @returns {Promise<IssueStatusHistory[]>} List of issue status history.
    */
   public async getIssueStatusHistory(
-    issueId: string
+    issueId: string,
   ): Promise<IssueStatusHistory[]> {
     const response = await axios.get(
       `${this.config.jiraApiUrl}/issue/${issueId}/changelog`,
@@ -126,7 +127,7 @@ export default class JiraClient {
         headers: {
           Authorization: `Basic ${this.authToken}`,
         },
-      }
+      },
     );
 
     const status: IssueStatusHistory[] = [];
@@ -134,7 +135,7 @@ export default class JiraClient {
     response.data.values.forEach((log: any) => {
       const items = log.items;
       items.forEach((item: any) => {
-        if (item.fieldId === 'status') {
+        if (item.fieldId === "status") {
           status.push({
             created: log.created,
             status: item.toString,

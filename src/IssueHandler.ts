@@ -1,14 +1,28 @@
-import JiraClient from './JiraClient';
+import JiraClient from "./JiraClient";
 
 interface Issue {
   id: string;
   key: string;
   project: string;
   isResolved: boolean;
-  createdDate: string;
-  resolutionDate: string;
-  timeSpent: number | null;
+  inProgressAt: string | null;
+  inReviewAt: string | null;
+  createdAt: string;
+  resolvedAt: string;
   status: string;
+  stage: {
+    createToInProgress: number;
+    inProgressToInReview: number;
+    inReviewToDone: number;
+    createToInReview: number;
+    createToDone: number;
+    averageDuration: number;
+  };
+}
+
+interface IssueStatusHistory {
+  created: string;
+  status: "In Progress" | "In Review" | "Done" | "To Do";
 }
 
 interface User {
@@ -40,24 +54,39 @@ export default class IssueHandler {
         const response = await this.jiraClient.getIssues(
           assigneeAccountId,
           startAt,
-          maxResults
+          maxResults,
         );
 
         if (response.issues.length === 0) break;
 
         for (const issue of response.issues) {
-          const timeSpent = await this.getTimeSpent(issue.id);
+          if (issue.fields.resolutiondate) {
+            const statusHistory = await this.jiraClient.getIssueStatusHistory(
+              issue.id,
+            );
+            const stage = this.getStage(issue, statusHistory);
 
-          issues.push({
-            id: issue.id,
-            key: issue.key,
-            project: issue.fields.project.name,
-            isResolved: issue.fields.resolution !== null,
-            createdDate: issue.fields.created,
-            resolutionDate: issue.fields.resolutiondate,
-            timeSpent: issue.createdDate ? timeSpent : null,
-            status: issue.fields.status.name,
-          });
+            const inProgressTimestamp =
+              this.getStatusTimestamp("In Progress", statusHistory)?.created ||
+              null;
+
+            const inReviewTimestamp =
+              this.getStatusTimestamp("In Review", statusHistory)?.created ||
+              null;
+
+            issues.push({
+              id: issue.id,
+              key: issue.key,
+              project: issue.fields.project.name,
+              isResolved: !!issue.fields.resolution,
+              inProgressAt: inProgressTimestamp,
+              inReviewAt: inReviewTimestamp,
+              createdAt: issue.fields.created,
+              resolvedAt: issue.fields.resolutiondate,
+              status: issue.fields.status.name,
+              stage,
+            });
+          }
         }
 
         startAt += maxResults;
@@ -83,34 +112,98 @@ export default class IssueHandler {
     return users;
   }
 
+  private getStage(
+    issue: any,
+    statusHistory: IssueStatusHistory[],
+  ): Issue["stage"] {
+    const timestamp = {
+      inProgress:
+        this.getStatusTimestamp("In Progress", statusHistory)?.created || null,
+      inReview:
+        this.getStatusTimestamp("In Review", statusHistory)?.created || null,
+      done: issue.fields.resolutiondate,
+      created: issue.fields.created,
+    };
+
+    const stage = {
+      createToInProgress: this.countTimeDifference(
+        timestamp.created,
+        timestamp.inProgress,
+      ),
+      inProgressToInReview: this.countTimeDifference(
+        timestamp.inProgress,
+        timestamp.inReview,
+      ),
+      inReviewToDone: this.countTimeDifference(
+        timestamp.inReview,
+        timestamp.done,
+      ),
+      createToInReview: this.countTimeDifference(
+        timestamp.created,
+        timestamp.inReview,
+      ),
+      createToDone: this.countTimeDifference(timestamp.created, timestamp.done),
+    };
+
+    const averageDuration = this.countStageAverage(stage);
+
+    return { ...stage, averageDuration };
+  }
+
+  private countStageAverage(
+    stage: Omit<Issue["stage"], "averageDuration">,
+  ): number {
+    const timeDifferences = Object.values(stage);
+    const sum = timeDifferences.reduce((acc, val) => acc + val, 0);
+    return sum / timeDifferences.length;
+  }
+
   /**
-   * Calculates the time spent between the created date and the resolution date.
+   * Count the time difference between two dates in second.
    *
-   * @param {string} createdDate
-   * @param {string|null} resolutionDate
-   * @returns {number|null} The spent time in seconds, or null
-   *
+   * @param start
+   * @param end
+   * @private
    */
-  private async getTimeSpent(issueId: string): Promise<number | null> {
-    const status = await this.jiraClient.getIssueStatusHistory(issueId);
+  private countTimeDifference(
+    start: string | null,
+    end: string | null,
+  ): number {
+    if (start === null || end === null) return 0;
 
-    if (status.length === 0) return null;
-    if (!status.some((s: any) => s.status === 'In Progress')) return null;
+    const startTime = new Date(start).getTime();
+    const endTime = new Date(end).getTime();
 
-    let timeSpent = 0;
+    return Math.floor((endTime - startTime) / 1000);
+  }
 
-    status.forEach((item, index) => {
-      if (item.status === 'In Progress') {
-        if (status[index + 1]) {
-          const time =
-            Number(new Date(status[index + 1].created)) -
-            Number(new Date(item.created));
+  /**
+   *
+   * @param status
+   * @param statusHistory
+   * @private
+   */
+  private getStatusTimestamp(
+    status: "In Progress" | "In Review",
+    statusHistory: IssueStatusHistory[],
+  ) {
+    let index: number;
 
-          timeSpent += Math.floor(time / 1000);
-        }
-      }
-    });
+    switch (status) {
+      case "In Progress":
+        index = statusHistory.findIndex(
+          (status) => status.status === "In Progress",
+        );
+        break;
+      case "In Review":
+        index = statusHistory.findLastIndex(
+          (status) => status.status === "In Review",
+        );
+        break;
+      default:
+        return null;
+    }
 
-    return timeSpent;
+    return index > -1 ? statusHistory[index] : null;
   }
 }
