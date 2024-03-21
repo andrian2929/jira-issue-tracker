@@ -30,50 +30,96 @@ Command line-based tools for tracking issue for each user in Jira
     [
       {
         "displayName": "Alex Johnson",
-        "accountId": "70121:abcd1234-101e-4ffc-82cc-db88059b80ad",
+        "accountId": "70121:608a738c-101e-4ffc-82cc-db88059b80ad",
         "accountType": "atlassian",
         "active": true,
         "emailAddress": "alex.johnson@example.com",
         "issues": [
           {
+            "id": "10008",
+            "key": "KAN-9",
+            "project": "My Kanban Project",
+            "summary": "Complete the task at hand",
+            "priority": "Medium",
+            "isResolved": true,
+            "inProgressAt": "2024-03-21T22:03:54.989+0700",
+            "inReviewAt": "2024-03-21T22:04:01.515+0700",
+            "createdAt": "2024-03-21T22:03:28.724+0700",
+            "resolvedAt": "2024-03-21T22:04:07.173+0700",
+            "status": "Done",
+            "estimatedStoryPoint": 1.5,
+            "stage": {
+              "createToInProgress": 26,
+              "inProgressToInReview": 6,
+              "inReviewToDone": 5,
+              "createToInReview": 32,
+              "createToDone": 38
+            }
+          },
+          {
             "id": "10007",
-            "key": "PROJ-1",
-            "project": "Project Alpha",
+            "key": "KAN-8",
+            "project": "My Kanban Project",
+            "summary": "Address this bug",
+            "priority": "Medium",
             "isResolved": true,
             "inProgressAt": null,
             "inReviewAt": null,
             "createdAt": "2024-03-14T09:04:24.703+0700",
             "resolvedAt": "2024-03-14T09:48:34.739+0700",
             "status": "Done",
+            "estimatedStoryPoint": null,
             "stage": {
               "createToInProgress": 0,
               "inProgressToInReview": 0,
               "inReviewToDone": 0,
               "createToInReview": 0,
-              "createToDone": 2650,
-              "averageDuration": 530
+              "createToDone": 2650
             }
           },
           {
             "id": "10006",
-            "key": "PROJ-2",
-            "project": "Alpha Project",
+            "key": "KAN-7",
+            "project": "My Kanban Project",
+            "summary": "Identify this song",
+            "priority": "Medium",
             "isResolved": true,
             "inProgressAt": "2024-03-07T14:53:03.158+0700",
             "inReviewAt": "2024-03-07T15:39:58.973+0700",
             "createdAt": "2024-03-07T14:52:40.531+0700",
-            "resolveAt": "2024-03-07T15:45:12.764+0700",
+            "resolvedAt": "2024-03-07T15:45:12.764+0700",
             "status": "Done",
+            "estimatedStoryPoint": null,
             "stage": {
               "createToInProgress": 22,
               "inProgressToInReview": 2815,
               "inReviewToDone": 313,
               "createToInReview": 2838,
-              "createToDone": 3152,
-              "averageDuration": 1828
+              "createToDone": 3152
             }
           }
-        ]
+        ],
+        "averageStageDuration": {
+          "createToInProgress": 16,
+          "inProgressToInReview": 940,
+          "inReviewToDone": 106,
+          "createToInReview": 956,
+          "createToDone": 1946
+        }
+      },
+      {
+        "displayName": "Jamie Smith",
+        "accountId": "712020:66033b0e-a307-4981-82f1-3dadcad206fc",
+        "accountType": "atlassian",
+        "active": true,
+        "issues": [],
+        "averageStageDuration": {
+          "createToInProgress": null,
+          "inProgressToInReview": null,
+          "inReviewToDone": null,
+          "createToInReview": null,
+          "createToDone": null
+        }
       }
     ]
    ```
@@ -100,8 +146,8 @@ Usage: Jira issue tracker
 Options:
   -s, --since <since>  Since date
   -u, --until <until>  Until date
+  -t, --type  <type>   Issue type (default: "all")
   -h, --help           display help for command
-  -t, --type  <type>   Filter the type of issue, default always Bug
 ```
 
 ## Authors
