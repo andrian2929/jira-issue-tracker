@@ -31,8 +31,11 @@ export default class JiraClient {
         maxResults: number = 50,
     ): Promise<any> {
         try {
+            let jql = `(created>=${this.option.since} and created<=${this.option.until}) and assignee=${assigneeAccountId}`;
+            if (this.option.type.toLowerCase() === "bug") jql += ` and issueType="Bug"`;
+
             const response = await axios.get(
-                `${this.config.jiraApiUrl}/search?jql=created>=${this.option.since} and created<=${this.option.until} and assignee=${assigneeAccountId}&startAt=${startAt}&maxResults=${maxResults}`,
+                `${this.config.jiraApiUrl}/search?jql=${jql}&startAt=${startAt}&maxResults=${maxResults}`,
                 {
                     headers: {
                         Authorization: `Basic ${this.authToken}`,

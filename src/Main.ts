@@ -26,6 +26,7 @@ class Main {
         program
             .requiredOption('-s, --since <since>', 'Since date')
             .requiredOption('-u, --until <until>', 'Until date')
+            .option('-t, --type <type>', 'Issue type', 'Bug')
             .usage('Jira issue tracker')
             .parse();
     }

@@ -50,6 +50,7 @@ export default class IssueHandler {
                             key: issue.key,
                             project: issue.fields.project.name,
                             summary: issue.fields.summary,
+                            priority: issue.fields.priority.name,
                             isResolved: !!issue.fields.resolution,
                             inProgressAt: inProgressTimestamp,
                             inReviewAt: inReviewTimestamp,

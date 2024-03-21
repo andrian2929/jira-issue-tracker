@@ -11,6 +11,7 @@ export interface Issue {
     key: string;
     project: string;
     summary: string;
+    priority: string;
     isResolved: boolean;
     inProgressAt: string | null;
     inReviewAt: string | null;

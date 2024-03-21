@@ -101,6 +101,7 @@ Options:
   -s, --since <since>  Since date
   -u, --until <until>  Until date
   -h, --help           display help for command
+  -t, --type  <type>   Filter the type of issue, default always Bug
 ```
 
 ## Authors
