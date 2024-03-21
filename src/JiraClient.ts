@@ -1,54 +1,8 @@
-import axios from "axios";
-
-interface JiraConfig {
-    jiraApiUrl: string;
-    jiraApiToken: string;
-    jiraEmail: string;
-    storyPointCustomFieldId: string;
-}
-
-interface Option {
-    since: string;
-    until: string;
-}
-
-interface User {
-    displayName: string;
-    accountId: string;
-    accountType: string;
-    active: boolean;
-    emailAddress: string;
-    issues?: Issue[];
-    averageStageDuration: Stage | null;
-}
-
-interface Stage {
-    createToInProgress: number;
-    inProgressToInReview: number;
-    inReviewToDone: number;
-    createToInReview: number;
-    createToDone: number;
-}
-
-interface Issue {
-    id: string;
-    key: string;
-    project: string;
-    summary: string;
-    isResolved: boolean;
-    inProgressAt: string | null;
-    inReviewAt: string | null;
-    createdAt: string;
-    resolvedAt: string;
-    status: string;
-    stage: Stage;
-    estimatedStoryPoint: number;
-}
-
-interface IssueStatusHistory {
-    created: string;
-    status: "In Progress" | "In Review" | "Done" | "To Do";
-}
+import axios from "axios"
+import {JiraConfig} from "./types/Config";
+import {Option} from "./types/Option";
+import {User} from "./types/User";
+import {StatusHistory} from "./types/Issue";
 
 export default class JiraClient {
     private readonly authToken: string;
@@ -122,11 +76,11 @@ export default class JiraClient {
      * Retrieves the issue status history.
      *
      * @param issueId
-     * @returns {Promise<IssueStatusHistory[]>} List of issue status history.
+     * @returns {Promise<StatusHistory[]>} List of issue status history.
      */
     public async getIssueStatusHistory(
         issueId: string,
-    ): Promise<IssueStatusHistory[]> {
+    ): Promise<StatusHistory[]> {
         const response = await axios.get(
             `${this.config.jiraApiUrl}/issue/${issueId}/changelog`,
             {
@@ -136,7 +90,7 @@ export default class JiraClient {
             },
         );
 
-        const status: IssueStatusHistory[] = [];
+        const status: StatusHistory[] = [];
 
         response.data.values.forEach((log: any) => {
             const items = log.items;

@@ -5,18 +5,9 @@ import * as fs from 'fs';
 import JiraClient from './JiraClient';
 import jiraConfig from '../config.json';
 import IssueHandler from './IssueHandler';
+import {JiraConfig} from "./types/Config";
+import {Option} from "./types/Option";
 
-interface Option {
-    since: string;
-    until: string;
-}
-
-interface JiraConfig {
-    jiraApiUrl: string;
-    jiraApiToken: string;
-    jiraEmail: string;
-    storyPointCustomFieldId: string;
-}
 
 class Main {
     private readonly option: Option;

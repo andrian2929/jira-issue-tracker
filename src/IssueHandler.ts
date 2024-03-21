@@ -1,43 +1,6 @@
 import JiraClient from "./JiraClient";
-
-interface Stage {
-    createToInProgress: number;
-    inProgressToInReview: number;
-    inReviewToDone: number;
-    createToInReview: number;
-    createToDone: number;
-}
-
-interface Issue {
-    id: string;
-    key: string;
-    project: string;
-    summary: string;
-    isResolved: boolean;
-    inProgressAt: string | null;
-    inReviewAt: string | null;
-    createdAt: string;
-    resolvedAt: string;
-    status: string;
-    estimatedStoryPoint: number;
-    stage: Stage;
-}
-
-
-interface IssueStatusHistory {
-    created: string;
-    status: "In Progress" | "In Review" | "Done" | "To Do";
-}
-
-interface User {
-    displayName: string;
-    accountId: string;
-    accountType: string;
-    active: boolean;
-    emailAddress: string;
-    issues?: Issue[];
-    averageStageDuration: Stage | null;
-}
+import {Issue, Stage, StatusHistory} from "./types/Issue";
+import {User} from "./types/User";
 
 export default class IssueHandler {
     constructor(private jiraClient: JiraClient) {
@@ -126,7 +89,7 @@ export default class IssueHandler {
 
     private getStage(
         issue: any,
-        statusHistory: IssueStatusHistory[],
+        statusHistory: StatusHistory[],
     ): Stage {
         const timestamp = {
             inProgress:
@@ -185,7 +148,7 @@ export default class IssueHandler {
      */
     private getStatusTimestamp(
         status: "In Progress" | "In Review",
-        statusHistory: IssueStatusHistory[],
+        statusHistory: StatusHistory[],
     ) {
         let index: number;
 
